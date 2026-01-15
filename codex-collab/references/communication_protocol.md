@@ -14,8 +14,10 @@ Request implementation guidance before starting work.
 
 **Example:**
 ```bash
-python scripts/collab_communicate.py --agent claude --type IMPLEMENT \
-  --message "Planning to implement OAuth2 flow. Should I use authlib or create custom?"
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py \
+  --agent claude --type IMPLEMENT \
+  --message "Planning to implement OAuth2 flow. Should I use authlib or create custom?" \
+  --notify
 ```
 
 ### REVIEW
@@ -33,7 +35,7 @@ Request code review after implementation.
 
 **Example:**
 ```bash
-python scripts/collab_communicate.py --agent claude --type REVIEW \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent claude --type REVIEW \
   --message "Completed OAuth2 implementation. Ready for security review." \
   --context '{"files": ["src/auth/oauth.py", "tests/test_oauth.py"], "status": "ready"}'
 ```
@@ -48,7 +50,7 @@ Provide suggestions, alternatives, or improvements.
 
 **Example:**
 ```bash
-python scripts/collab_communicate.py --agent codex --type SUGGEST \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent codex --type SUGGEST \
   --message "For OAuth2, use authlib. It's battle-tested and handles edge cases. Consider: 1) PKCE for mobile clients, 2) Token refresh strategy, 3) State parameter validation"
 ```
 
@@ -62,7 +64,7 @@ Approve implementation after review.
 
 **Example:**
 ```bash
-python scripts/collab_communicate.py --agent codex --type APPROVE \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent codex --type APPROVE \
   --message "OAuth implementation looks solid. Security patterns are correct, tests cover edge cases."
 ```
 
@@ -76,7 +78,7 @@ Ask for clarification or additional information.
 
 **Example:**
 ```bash
-python scripts/collab_communicate.py --agent claude --type QUESTION \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent claude --type QUESTION \
   --message "Should the OAuth flow support both authorization code and implicit grant types, or just authorization code?"
 ```
 
@@ -91,7 +93,7 @@ Signal that a task is fully complete.
 
 **Example:**
 ```bash
-python scripts/collab_communicate.py --agent claude --type COMPLETE \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent claude --type COMPLETE \
   --message "OAuth2 implementation complete with all feedback incorporated. Tests passing, docs updated."
 ```
 
@@ -192,27 +194,27 @@ python scripts/collab_communicate.py --agent claude --type COMPLETE \
 
 ### Basic Read
 ```bash
-python scripts/collab_communicate.py --agent codex --action read
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent codex --action read
 ```
 
 ### Read All Messages (including own)
 ```bash
-python scripts/collab_communicate.py --agent codex --action read --all
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent codex --action read --all
 ```
 
 ### Read Limited Messages
 ```bash
-python scripts/collab_communicate.py --agent codex --action read --limit 5
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent codex --action read --limit 5
 ```
 
 ### View History
 ```bash
-python scripts/collab_communicate.py --action history --limit 20
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --action history --limit 20
 ```
 
 ### Clear Current Messages
 ```bash
-python scripts/collab_communicate.py --action clear
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --action clear
 ```
 
 ## Error Handling
@@ -221,8 +223,43 @@ If communication fails:
 
 1. **Check directory exists**: `/tmp/codex_collab/`
 2. **Check file permissions**: Messages file should be readable/writable
-3. **Reinitialize**: Run `session_manager.py --init` to recreate structure
+3. **Reinitialize**: Run `python3 ~/.claude/skills/codex-collab/scripts/session_manager.py --init` to recreate structure
 4. **View raw messages**: `cat /tmp/codex_collab/messages.json`
+
+## New Options (v2)
+
+### Auto-notification (--notify)
+
+Automatically send a notification to the other agent's pane after sending a message:
+
+```bash
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py \
+  --agent claude --type REVIEW \
+  --message "Ready for review" \
+  --notify
+```
+
+### Response waiting (--wait)
+
+Wait for response from the other agent after sending a message:
+
+```bash
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py \
+  --agent claude --type IMPLEMENT \
+  --message "Need guidance" \
+  --wait --timeout 90
+```
+
+### Combining options
+
+Send message with notification and wait for response:
+
+```bash
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py \
+  --agent claude --type IMPLEMENT \
+  --message "Need architectural guidance" \
+  --notify --wait --timeout 60
+```
 
 ## Tips
 
@@ -231,3 +268,5 @@ If communication fails:
 - Use history to review past decisions and patterns
 - Include context liberally; it's better to over-communicate than under-communicate
 - Establish message frequency expectations to maintain development rhythm
+- Use `--notify` to reduce manual notification overhead
+- Use `--wait` for synchronous workflows requiring immediate response

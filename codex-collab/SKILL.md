@@ -14,6 +14,8 @@ allowed-tools:
 
 Real parallel collaboration using tmux with automatic fallback.
 
+> **Note**: This skill requires UNIX-like OS (macOS, Linux). Windows is not supported (uses fcntl for file locking).
+
 ## IMPORTANT: DO NOT USE MCP/Codex Plugin
 
 **This skill uses tmux for collaboration. DO NOT call Codex via MCP or any plugin.**
@@ -280,7 +282,7 @@ The default operational mode for professional collaboration.
 
 ```
 ┌─────────────────────────┬─────────────────────────┐
-│ Code (Left)      │ Codex (Right)           │
+│ Code (Left)             │ Codex (Right)           │
 │ ─────────────────────── │ ─────────────────────── │
 │ Role: Implementation    │ Role: Review & Guidance │
 │ Agent ID: claude        │ Agent ID: codex         │
@@ -291,9 +293,11 @@ The default operational mode for professional collaboration.
 └─────────────────────────┴─────────────────────────┘
                     ▼
         /tmp/codex_collab/
-        ├── messages.json (active queue)
-        ├── history.json (full log)
-        └── sessions.json (metadata)
+        ├── messages.json       (active queue)
+        ├── history.json        (full log)
+        ├── sessions.json       (session metadata)
+        ├── pane_info.json      (dynamic pane IDs)
+        └── current_session.txt (current session name)
 ```
 
 ## Installation & Setup
@@ -362,11 +366,50 @@ python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent clau
 ## Message Types
 
 - **IMPLEMENT**: Request guidance before starting
-- **REVIEW**: Request code review  
+- **REVIEW**: Request code review
 - **SUGGEST**: Provide feedback/alternatives
 - **APPROVE**: Approve implementation
 - **QUESTION**: Ask for clarification
 - **COMPLETE**: Signal task completion
+
+## New Features (v2)
+
+### Auto-notification (--notify)
+
+Send automatic notification to the other pane when sending a message:
+
+```bash
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py \
+  --agent claude --type IMPLEMENT --message "Need guidance" --notify
+```
+
+### Response waiting (--wait)
+
+Wait for response after sending a message:
+
+```bash
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py \
+  --agent claude --type IMPLEMENT --message "Need guidance" --wait --timeout 90
+```
+
+### Session creation from outside tmux
+
+When running from outside tmux, a new session is automatically created:
+
+```bash
+# From outside tmux - creates new session
+python3 ~/.claude/skills/codex-collab/scripts/session_manager.py \
+  --init --session-name my-project
+
+# Then attach to the session
+tmux attach-session -t my-project
+```
+
+### Data Protection
+
+- **Exclusive locking**: Prevents concurrent write corruption (fcntl)
+- **Atomic writes**: Uses temp file + os.replace for crash safety
+- **Auto-recovery**: Corrupted JSON files are backed up to .bak with warning
 
 ## Development Workflow
 
