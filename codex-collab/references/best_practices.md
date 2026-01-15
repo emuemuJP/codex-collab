@@ -59,13 +59,13 @@ Include relevant information:
 #### Example Workflow
 ```bash
 # Start with guidance
-python scripts/collab_communicate.py --agent claude --type IMPLEMENT \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent claude --type IMPLEMENT \
   --message "Building rate limiter. Planning sliding window with Redis. Thoughts?"
 
 # Wait for response...
 
 # After implementation
-python scripts/collab_communicate.py --agent claude --type REVIEW \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent claude --type REVIEW \
   --message "Rate limiter complete. Used sliding window with Redis. Tests at 98% coverage." \
   --context '{"files": ["src/middleware/rate_limiter.py", "tests/test_rate_limiter.py"]}'
 ```
@@ -98,7 +98,7 @@ python scripts/collab_communicate.py --agent claude --type REVIEW \
 #### Example Review Response
 ```bash
 # Good review with specific feedback
-python scripts/collab_communicate.py --agent codex --type SUGGEST \
+python3 ~/.claude/skills/codex-collab/scripts/collab_communicate.py --agent codex --type SUGGEST \
   --message "Rate limiter looks solid. Three suggestions:
 1. Add exponential backoff for temporary bans (prevents rapid retries)
 2. Consider distributed rate limiting if you plan to scale horizontally
